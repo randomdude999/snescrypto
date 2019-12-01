@@ -41,21 +41,17 @@ KeyExpansion:
         ASL
         ASL
         TAX
-        ; TODO see if 16bit is faster here
+        REP #$20
         LDA !keybuffer+0,x
         STA !_+4
-        LDA !keybuffer+1,x
-        STA !_+5
         LDA !keybuffer+2,x
         STA !_+6
-        LDA !keybuffer+3,x
-        STA !_+7
+        SEP #$20
         
         ; do all the ops here
         LDA !_+1
         BNE +
             ; RotWord
-            ; potentially 16bittable?
             LDX !_+4
             LDA !_+7
             STX !_+7
@@ -65,7 +61,6 @@ KeyExpansion:
             STX !_+5
             STA !_+4
             ; SubWord
-            ; definitely not possible to do 16-bit
             LDX !_+4
             LDA SBox,x
             STA !_+4
@@ -117,19 +112,14 @@ KeyExpansion:
         ASL
         TAY
         
-        ; TODO definitely 16bittable
+        REP #$20
         LDA !keybuffer+0,y
         EOR !_+4
         STA !keybuffer+0,x
-        LDA !keybuffer+1,y
-        EOR !_+5
-        STA !keybuffer+1,x
         LDA !keybuffer+2,y
         EOR !_+6
         STA !keybuffer+2,x
-        LDA !keybuffer+3,y
-        EOR !_+7
-        STA !keybuffer+3,x
+        SEP #$20
         
         PLY
         ; increment the modulus

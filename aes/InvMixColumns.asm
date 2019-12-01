@@ -44,14 +44,12 @@ InvMixColumns:
     LDX #$0C
 .loop
 
+    REP #$20
     LDA !state+0,x
     STA !_+0
-    LDA !state+1,x
-    STA !_+1
     LDA !state+2,x
     STA !_+2
-    LDA !state+3,x
-    STA !_+3
+    SEP #$20
 
     %MulThingE(0)
     STA !_+6

@@ -2,8 +2,6 @@ function state(col,row) = 4*col+row+!state
 
 macro ShiftRows(a,b)
     ; row 1 (or 3 in InvShiftRows)
-    ; not sure if 16bittable
-    ; TODO see if possible to combine 16bit swaps and XBA
     LDX state(0,<a>)
     LDA state(3,<a>)
     STX state(3,<a>)
@@ -13,7 +11,6 @@ macro ShiftRows(a,b)
     STX state(1,<a>)
     STA state(0,<a>)
     ; row 2
-    ; TODO 16bit mode?
     LDX state(0,2)
     LDA state(2,2)
     STA state(0,2)
