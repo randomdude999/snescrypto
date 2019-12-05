@@ -263,6 +263,10 @@ SHA1Transform:
     %R(!c,!d,!e,!a,!b,78,4)
     %R(!b,!c,!d,!e,!a,79,4)
 
+    STZ !_+0
+    STZ !_+2
+    LDX #$0000
+    LDY #$0000
     !i #= 0
     while !i < 5
         LDA !_+4+!i*4
@@ -272,8 +276,8 @@ SHA1Transform:
         LDA !_+6+!i*4
         ADC !state+2+!i*4
         STA !state+2+!i*4
-        ;STZ !_+4+!i*4
-        ;STZ !_+6+!i*4
+        STZ !_+4+!i*4
+        STZ !_+6+!i*4
         !i #= !i+1
     endif
 
