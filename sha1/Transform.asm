@@ -49,6 +49,7 @@ macro RoundCommon(v,w,z,cl,ch)
         ASL !_+0
         ROL !_+2
         ROL
+        !i #= !i+1
     endif
     TSB !_+0
     
@@ -63,15 +64,15 @@ macro RoundCommon(v,w,z,cl,ch)
     CLC : ADC <z>
     TAX
     TYA
-    ADC <z>
+    ADC <z>+2
     TAY
 
     TXA
     CLC : ADC !_+0
     STA <z>
-    TAY
+    TYA
     ADC !_+2
-    STA <z>
+    STA <z>+2
 
     LDA #$0000
     LSR <w>+2
@@ -116,6 +117,7 @@ macro R2(v,w,x,y,z,i)
 endmacro
 
 macro R3(v,w,x,y,z,i)
+    WDM #$00
     LDA <w>
     ORA <x>
     AND <y>
@@ -167,7 +169,113 @@ SHA1Transform:
 !a = !_+4
 !b = !_+8
 !c = !_+12
-!d = !_+14
-!e = !_+16
-    ; wip
+!d = !_+16
+!e = !_+20
+    !i #= 0
+    while !i < 5
+        LDA !state+0+!i*4
+        STA !_+4+!i*4
+        LDA !state+2+!i*4
+        STA !_+6+!i*4
+        !i #= !i+1
+    endif
+    ; TODO: check how big the full transform function gets. if ridiculous, use a loop instead, shifting the variables over by 1 each iteration (still unrolled 5x, but that isn't as bad as 80x)
+    %R(!a,!b,!c,!d,!e,0,0)
+    %R(!e,!a,!b,!c,!d,1,0)
+    %R(!d,!e,!a,!b,!c,2,0)
+    %R(!c,!d,!e,!a,!b,3,0)
+    %R(!b,!c,!d,!e,!a,4,0)
+    %R(!a,!b,!c,!d,!e,5,0)
+    %R(!e,!a,!b,!c,!d,6,0)
+    %R(!d,!e,!a,!b,!c,7,0)
+    %R(!c,!d,!e,!a,!b,8,0)
+    %R(!b,!c,!d,!e,!a,9,0)
+    %R(!a,!b,!c,!d,!e,10,0)
+    %R(!e,!a,!b,!c,!d,11,0)
+    %R(!d,!e,!a,!b,!c,12,0)
+    %R(!c,!d,!e,!a,!b,13,0)
+    %R(!b,!c,!d,!e,!a,14,0)
+    %R(!a,!b,!c,!d,!e,15,0)
+    %R(!e,!a,!b,!c,!d,16,0)
+    %R(!d,!e,!a,!b,!c,17,0)
+    %R(!c,!d,!e,!a,!b,18,0)
+    %R(!b,!c,!d,!e,!a,19,0)
+
+    %R(!a,!b,!c,!d,!e,20,2)
+    %R(!e,!a,!b,!c,!d,21,2)
+    %R(!d,!e,!a,!b,!c,22,2)
+    %R(!c,!d,!e,!a,!b,23,2)
+    %R(!b,!c,!d,!e,!a,24,2)
+    %R(!a,!b,!c,!d,!e,25,2)
+    %R(!e,!a,!b,!c,!d,26,2)
+    %R(!d,!e,!a,!b,!c,27,2)
+    %R(!c,!d,!e,!a,!b,28,2)
+    %R(!b,!c,!d,!e,!a,29,2)
+    %R(!a,!b,!c,!d,!e,30,2)
+    %R(!e,!a,!b,!c,!d,31,2)
+    %R(!d,!e,!a,!b,!c,32,2)
+    %R(!c,!d,!e,!a,!b,33,2)
+    %R(!b,!c,!d,!e,!a,34,2)
+    %R(!a,!b,!c,!d,!e,35,2)
+    %R(!e,!a,!b,!c,!d,36,2)
+    %R(!d,!e,!a,!b,!c,37,2)
+    %R(!c,!d,!e,!a,!b,38,2)
+    %R(!b,!c,!d,!e,!a,39,2)
+
+    %R(!a,!b,!c,!d,!e,40,3)
+    %R(!e,!a,!b,!c,!d,41,3)
+    %R(!d,!e,!a,!b,!c,42,3)
+    %R(!c,!d,!e,!a,!b,43,3)
+    %R(!b,!c,!d,!e,!a,44,3)
+    %R(!a,!b,!c,!d,!e,45,3)
+    %R(!e,!a,!b,!c,!d,46,3)
+    %R(!d,!e,!a,!b,!c,47,3)
+    %R(!c,!d,!e,!a,!b,48,3)
+    %R(!b,!c,!d,!e,!a,49,3)
+    %R(!a,!b,!c,!d,!e,50,3)
+    %R(!e,!a,!b,!c,!d,51,3)
+    %R(!d,!e,!a,!b,!c,52,3)
+    %R(!c,!d,!e,!a,!b,53,3)
+    %R(!b,!c,!d,!e,!a,54,3)
+    %R(!a,!b,!c,!d,!e,55,3)
+    %R(!e,!a,!b,!c,!d,56,3)
+    %R(!d,!e,!a,!b,!c,57,3)
+    %R(!c,!d,!e,!a,!b,58,3)
+    %R(!b,!c,!d,!e,!a,59,3)
+
+    %R(!a,!b,!c,!d,!e,60,4)
+    %R(!e,!a,!b,!c,!d,61,4)
+    %R(!d,!e,!a,!b,!c,62,4)
+    %R(!c,!d,!e,!a,!b,63,4)
+    %R(!b,!c,!d,!e,!a,64,4)
+    %R(!a,!b,!c,!d,!e,65,4)
+    %R(!e,!a,!b,!c,!d,66,4)
+    %R(!d,!e,!a,!b,!c,67,4)
+    %R(!c,!d,!e,!a,!b,68,4)
+    %R(!b,!c,!d,!e,!a,69,4)
+    %R(!a,!b,!c,!d,!e,70,4)
+    %R(!e,!a,!b,!c,!d,71,4)
+    %R(!d,!e,!a,!b,!c,72,4)
+    %R(!c,!d,!e,!a,!b,73,4)
+    %R(!b,!c,!d,!e,!a,74,4)
+    %R(!a,!b,!c,!d,!e,75,4)
+    %R(!e,!a,!b,!c,!d,76,4)
+    %R(!d,!e,!a,!b,!c,77,4)
+    %R(!c,!d,!e,!a,!b,78,4)
+    %R(!b,!c,!d,!e,!a,79,4)
+
+    !i #= 0
+    while !i < 5
+        LDA !_+4+!i*4
+        CLC
+        ADC !state+0+!i*4
+        STA !state+0+!i*4
+        LDA !_+6+!i*4
+        ADC !state+2+!i*4
+        STA !state+2+!i*4
+        ;STZ !_+4+!i*4
+        ;STZ !_+6+!i*4
+        !i #= !i+1
+    endif
+
     RTS
