@@ -117,7 +117,6 @@ macro R2(v,w,x,y,z,i)
 endmacro
 
 macro R3(v,w,x,y,z,i)
-    WDM #$00
     LDA <w>
     ORA <x>
     AND <y>
@@ -134,7 +133,7 @@ macro R3(v,w,x,y,z,i)
     STA !_+0
     LDA <w>+2
     AND <x>+2
-    EOR !_+0
+    ORA !_+0
     ADC !block+(<i>&15)*4+2
     TAY
 
