@@ -1,5 +1,5 @@
 
-; currently like 24 bytes of scratch
+; currently like 28 bytes of scratch
 !_ = $00
 
 ; something (28 bytes)

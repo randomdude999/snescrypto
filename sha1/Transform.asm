@@ -266,8 +266,9 @@ SHA1Transform:
 
     STZ !_+0
     STZ !_+2
-    LDX #$0000
-    LDY #$0000
+    ; the only place that *should* call this is SHA1Update, which backs up X and Y for its own use
+    ;LDX #$0000
+    ;LDY #$0000
     !i #= 0
     while !i < 5
         LDA !_+4+!i*4
