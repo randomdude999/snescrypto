@@ -7,7 +7,7 @@ RESET:
     JSR SHA1Initialize
     
     LDX #myblk
-    LDA #$0003
+    LDA #myblk_sub-myblk
     JSR SHA1Update
 
     LDX #myblk_sub
@@ -18,13 +18,12 @@ RESET:
 
 
 myblk:
-db "abc"
-.sub
+db "abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq"
 db $80
-rep 52 : db $00
-
 rep 7 : db $00
-db $18
+.sub
+rep 62 : db $00
+db $01,$C0
 .end
 
 incsrc sha1.asm

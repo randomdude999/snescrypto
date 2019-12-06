@@ -44,7 +44,7 @@ SHA1Update:
     ; continue from where we left off
     TAX
     LDY #$0000
-    SEP #$20
+--  SEP #$20
 -   LDA (!_+26),y
     STA !block,x
     INX
@@ -56,12 +56,11 @@ SHA1Update:
     BRA -
 +   REP #$20
     PHY
-    PHX
     JSR SHA1Transform
-    PLX
+    LDX #$0000
     PLY
     CPY !_+24
-    BNE -
+    BNE --
 ++  REP #$20
     ; we done?
     RTS
