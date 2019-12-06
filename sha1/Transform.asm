@@ -179,6 +179,7 @@ SHA1Transform:
         !i #= !i+1
     endif
     ; TODO: check how big the full transform function gets. if ridiculous, use a loop instead, shifting the variables over by 1 each iteration (still unrolled 5x, but that isn't as bad as 80x)
+    ; note to self: it's 13kb, may want to make this a compile time option
     %R(!a,!b,!c,!d,!e,0,0)
     %R(!e,!a,!b,!c,!d,1,0)
     %R(!d,!e,!a,!b,!c,2,0)

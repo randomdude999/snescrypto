@@ -5,8 +5,12 @@
 ; something (28 bytes)
 !state = $0100
 
+; internal
+!count = !state+20
+
 ; something else (64 bytes)
 !block = $0200
 
 incsrc Transform.asm
 incsrc Initialize.asm
+incsrc Update.asm
