@@ -1,22 +1,25 @@
-extra_blk: db $80
-
 ; Y = pointer to place where to store the resulting hash
 SHA1Finalize:
     PHY
-    ; todo: should probably not call sha1update here, seems a bit wasteful
-    LDX #extra_blk
-    LDA #$0001
-    JSR SHA1Update
-    ; add the bunch of nulls now
+    ; add the 0x80 byte
     LDA !count
     LSR
     LSR
     LSR
-    AND #$003F
-    CMP #$0038
+    TAX
+    SEP #$20
+    LDA #$80
+    STA !block,x
+    REP #$20
+    INX
+    CPX #$0040
+    BNE +
+    JSR SHA1Transform
+    LDX #$0000
++   ; add the bunch of nulls now
+    CPX #$0038
     BEQ .addlen
     BCC .thisblk
-    TAX
     SEP #$20
     LDA #$00
 -   STA !block,x
@@ -24,28 +27,10 @@ SHA1Finalize:
     CPX #$0040
     BNE -
     REP #$20
-    ; update bit count
-    LDA !count
-    AND #$01F8
-    STA !_+0
-    LDA #$0200
-    SEC : SBC !_+0
-    CLC : ADC !count
-    STA !count
-    LDA !count+2
-    ADC #$0000
-    STA !count+2
-    LDA !count+4
-    ADC #$0000
-    STA !count+4
-    LDA !count+6
-    ADC #$0000
-    STA !count+6
 
     JSR SHA1Transform
     LDA #$0000
 .thisblk:
-    TAX
     SEP #$20
     LDA #$00
 -   STA !block,x
@@ -53,13 +38,6 @@ SHA1Finalize:
     CPX #$0038
     BNE -
     REP #$20
-    LDA !count
-    ; need to pad to xxxx_xxx1_1100_0000
-    ; currently have xxxx_xxxy_yyyy_yyyy
-    ; and 2nd is guaranteed smaller
-    AND #$FE00
-    ORA #$01C0
-    STA !count
 .addlen:
     LDA !count
     XBA
@@ -76,7 +54,37 @@ SHA1Finalize:
 
     JSR SHA1Transform
 
-    ; now should just write the hash to the right place
-    ; TODO
+    ; now just write the hash to the right place
+    PLX
+    LDA !state+2
+    XBA
+    STA $0000,x
+    LDA !state+0
+    XBA
+    STA $0002,x
+    LDA !state+6
+    XBA
+    STA $0004,x
+    LDA !state+4
+    XBA
+    STA $0006,x
+    LDA !state+10
+    XBA
+    STA $0008,x
+    LDA !state+8
+    XBA
+    STA $000A,x
+    LDA !state+14
+    XBA
+    STA $000C,x
+    LDA !state+12
+    XBA
+    STA $000E,x
+    LDA !state+18
+    XBA
+    STA $0010,x
+    LDA !state+16
+    XBA
+    STA $0012,x
     RTS
 

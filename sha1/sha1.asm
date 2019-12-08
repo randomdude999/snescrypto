@@ -14,3 +14,4 @@
 incsrc Transform.asm
 incsrc Initialize.asm
 incsrc Update.asm
+incsrc Finalize.asm
