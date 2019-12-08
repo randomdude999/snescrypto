@@ -3,6 +3,9 @@
 
 ; uses !xtime from MixColumns.asm
 
+; TODO: check how big/fast this thing would be when using a LUT for !xtime
+; (i'm honestly thinking it may be shorter)
+
 macro MulThing9(off)
     LDA !_+<off>
     !xtime
