@@ -6,6 +6,7 @@ SHA1Finalize:
     LSR
     LSR
     LSR
+    AND #$003F
     TAX
     SEP #$20
     LDA #$80
@@ -29,7 +30,7 @@ SHA1Finalize:
     REP #$20
 
     JSR SHA1Transform
-    LDA #$0000
+    LDX #$0000
 .thisblk:
     SEP #$20
     LDA #$00
