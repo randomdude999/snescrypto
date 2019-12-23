@@ -3,9 +3,11 @@
 ; TODO: this one is pretty much the slowest part of the whole algorithm
 ; (at least when doing InvCipher)
 ; possibly add option to use a 256-byte lookup table instead of this thing?
-!xtime = "ASL : BCC + : EOR #$1B : BRA ++ : + WDM #$42 : WDM #$42 : ++"
+; !xtime = "ASL : BCC + : EOR #$1B : BRA ++ : + WDM #$42 : WDM #$42 : ++"
+; the LUT is defined in SBox.asm
+!xtime = "TAY : LDA XTime,y"
 
-; wrecks A,X,!_+0,!_+1
+; wrecks A,X,Y,!_+0,!_+1
 MixColumns:
     LDX #$0C
     .mainloop

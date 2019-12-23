@@ -36,3 +36,16 @@ db $1f,$dd,$a8,$33,$88,$07,$c7,$31,$b1,$12,$10,$59,$27,$80,$ec,$5f
 db $60,$51,$7f,$a9,$19,$b5,$4a,$0d,$2d,$e5,$7a,$9f,$93,$c9,$9c,$ef
 db $a0,$e0,$3b,$4d,$ae,$2a,$f5,$b0,$c8,$eb,$bb,$3c,$83,$53,$99,$61
 db $17,$2b,$04,$7e,$ba,$77,$d6,$26,$e1,$69,$14,$63,$55,$21,$0c,$7d
+
+XTime:
+; putting the xtime lookup table here too because it's already page-aligned
+!i = 0
+while !i < 128
+    db !i<<1
+    !i #= !i+1
+endif
+!i = 0
+while !i < 128
+    db (!i<<1)^$1B
+    !i #= !i+1
+endif

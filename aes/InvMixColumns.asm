@@ -42,7 +42,7 @@ macro MulThingE(off)
     EOR !_+4
 endmacro
 
-; wrecks A,X, !_+{0..6}
+; wrecks A,X,Y, !_+{0..6}
 InvMixColumns:
     LDX #$0C
 .loop

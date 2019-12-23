@@ -11,9 +11,12 @@ Cipher:
 .loop
         JSR SubBytes
         JSR ShiftRows
-        JSR MixColumns
-        TYA
         PHY
+        JSR MixColumns
+        ;PLY
+        ;TYA
+        ;PHY
+        LDA $01,s
         JSR AddRoundKey
         PLY
     INY
@@ -42,8 +45,8 @@ InvCipher:
         PHY
         TYA
         JSR AddRoundKey
-        PLY
         JSR InvMixColumns
+        PLY
     DEY
     BNE .loop
     JSR InvShiftRows
