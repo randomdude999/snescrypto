@@ -11,7 +11,16 @@
 ; something else (64 bytes)
 !block = $0200
 
-incsrc Transform.asm
+; set to 'speed' to use an unrolled transform function. this takes 11KB of ROM space, but takes 170 scanlines to do a block instead of X scanlines for the size-optimized one.
+!optimize = size
+
+if stringsequal("!optimize","size")
+    incsrc TransformSmall.asm
+elseif stringsequal("!optimize","speed")
+    incsrc TransformFast.asm
+else
+    error "invalid value of \!optimize"
+endif
 incsrc Initialize.asm
 incsrc Update.asm
 incsrc Finalize.asm
