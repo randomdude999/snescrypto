@@ -8,46 +8,51 @@ math pri on
 !c = !_+12
 !d = !_+16
 !e = !_+20
-!roundcount = !_+24 ; 2 bytes (only low values are used, but rep/sep is slow)
+!roundcounta = !_+24 ; 2 bytes (only low values are used, but rep/sep is slow)
+!roundcountb = !_+30 ; used to count rounds mod 20, for cycling the round-specific ops
 !f = !_+26 ; 2 bytes (temporary for doing the cyclic shifting of variables at one point)
+!blkptr = !_+28 ; 2 bytes, temporary pointer
 
-macro ExpandStuff(i)
-    LDA !roundcount
-    AND #$000F
-    ASL
-    ASL
-    ADC.w #!block
-    STA !roundcount+2
-    if <i> < 16
-        ; do the thing called blk0 in the c impl
-        ; swap bytes of i'th u32 in blk
-        LDA !block+<i>*4
-        XBA
-        LDX !block+<i>*4+2
-        STA !block+<i>*4+2
-        TXA
-        XBA
-        STA !block+<i>*4
-    else
-        LDA !block+((<i>+0)&15)*4
-        EOR !block+((<i>+2)&15)*4
-        EOR !block+((<i>+8)&15)*4
-        EOR !block+((<i>+13)&15)*4
+
+
+UpdateRoundConsts:
+    LDA !roundcounta
+    BNE +
+    JMP .first
+    !i #= 0
++   while !i < 16
+        LDA !block+((!i+0)&15)*4
+        EOR !block+((!i+2)&15)*4
+        EOR !block+((!i+8)&15)*4
+        EOR !block+((!i+13)&15)*4
         ASL
-        STA !block+((<i>+0)&15)*4
-        LDA !block+((<i>+0)&15)*4+2
-        EOR !block+((<i>+2)&15)*4+2
-        EOR !block+((<i>+8)&15)*4+2
-        EOR !block+((<i>+13)&15)*4+2
+        STA !block+((!i+0)&15)*4
+        LDA !block+((!i+0)&15)*4+2
+        EOR !block+((!i+2)&15)*4+2
+        EOR !block+((!i+8)&15)*4+2
+        EOR !block+((!i+13)&15)*4+2
         ROL
-        STA !block+((<i>+0)&15)*4+2
+        STA !block+((!i+0)&15)*4+2
         LDA #$0000
         ROL
-        TSB !block+((<i>+0)&15)*4
+        TSB !block+((!i+0)&15)*4
+        !i #= !i+1
     endif
-endmacro
+    RTS
+.first:
+    !i #= 0
+    while !i < 16
+        LDA !block+!i*4
+        XBA
+        LDX !block+!i*4+2
+        STA !block+!i*4+2
+        TXA
+        XBA
+        STA !block+!i*4
+        !i #= !i+1
+    endif
 
-; macro RoundCommon(v,w,z,cl,ch)
+
 RoundCommon:
     LDA !a
     STA !_+0
@@ -82,56 +87,42 @@ RoundCommon:
 
     TXA
     CLC : ADC !_+0
-    TAX
+    STA !_ ;TAX
     TYA
     ADC !_+2
     TAY
 
     RTS
 
-macro RoundCommonEnd(cl,ch)
-    TXA
-    CLC : ADC #<cl>
-    STA !e
-    TYA
-    ADC #<ch>
-    STA !e+2
-endmacro
-
-; note: this is also R1, since the difference in the blk used is handled in %expandstuff already
-macro R0(i)
+R0:
     LDA !c
     EOR !d
     AND !b
     EOR !d
-    CLC : ADC !block+(<i>&15)*4
+    CLC : ADC !blkptr
     TAX
     LDA !c+2
     EOR !d+2
     AND !b+2
     EOR !d+2
-    ADC !block+(<i>&15)*4+2
+    ADC !blkptr+2
     TAY
-    JSR RoundCommon
-    %RoundCommonEnd($7999,$5A82)
-endmacro
+    RTS
 
-macro R2(i)
+R1:
     LDA !b
     EOR !c
     EOR !d
-    CLC : ADC !block+(<i>&15)*4
+    CLC : ADC !blkptr
     TAX
     LDA !b+2
     EOR !c+2
     EOR !d+2
-    ADC !block+(<i>&15)*4+2
+    ADC !blkptr+2
     TAY
-    JSR RoundCommon
-    %RoundCommonEnd($EBA1,$6ED9)
-endmacro
+    RTS
 
-macro R3(i)
+R2:
     LDA !b
     ORA !c
     AND !d
@@ -139,7 +130,7 @@ macro R3(i)
     LDA !b
     AND !c
     ORA !_+0
-    CLC : ADC !block+(<i>&15)*4
+    CLC : ADC !blkptr*4
     TAX
 
     LDA !b+2
@@ -149,33 +140,45 @@ macro R3(i)
     LDA !b+2
     AND !c+2
     ORA !_+0
-    ADC !block+(<i>&15)*4+2
+    ADC !blkptr+2
     TAY
+    RTS
 
-    JSR RoundCommon
-    %RoundCommonEnd($BCDC,$8F1B)
-endmacro
-
-macro R4(i)
+R3:
     LDA !b
     EOR !c
     EOR !d
-    CLC : ADC !block+(<i>&15)*4
+    CLC : ADC !blkptr
     TAX
     LDA !b+2
     EOR !c+2
     EOR !d+2
-    ADC !block+(<i>&15)*4+2
+    ADC !blkptr+2
     TAY
-    JSR RoundCommon
-    %RoundCommonEnd($C1D6,$CA62)
-endmacro
+    RTS
 
+RoundSpecificFuncTbl:
+    dw R0
+    dw R1
+    dw R2
+    dw R3
+
+RoundSpecificConstsLow:
+    dw $7999
+    dw $EBA1
+    dw $BCDC
+    dw $C1D6
+
+RoundSpecificConstsHigh:
+    dw $5A82
+    dw $6ED9
+    dw $8F1B
+    dw $CA62
 
 ShiftVars:
     !off = 0
     while !off < 4 ; loop twice
-        LDX !a+!off
+        LDY !a+!off
         LDA !e+!off
         STA !a+!off
         LDA !d+!off
@@ -184,7 +187,7 @@ ShiftVars:
         STA !d+!off
         LDA !b+!off
         STA !c+!off
-        STX !b+!off
+        STY !b+!off
         !off #= !off+2
     endif
     RTS
@@ -203,36 +206,44 @@ SHA1Transform:
         STA !_+6+!i*4
         !i #= !i+1
     endif
-    STZ !roundcount
--   %R0(0)
-    ; a->tmp; e->a; d->e; c->d; b->c; tmp->b
+
+    STZ !roundcounta
+    STZ !roundcountb ; mod 20, used for other check
+-   LDA !roundcounta
+    AND #$000F
+    BNE +
+    JSR UpdateRoundConsts
++   ASL
+    ASL
+    ; no overflow, carry def clear
+    ADC #!block
+    STA !blkptr
+    
+    STX !f ; back up the index, it's overwritten by temps
+    ; round-specific function
+    JSR (RoundSpecificFuncTbl,x)
+    JSR RoundCommon
+    ; now the round-specific end
+    LDX !f
+    LDA !_ ; we write to !_ instead of moving to X as the last part of RoundCommon
+    CLC : ADC RoundSpecificConstsLow,x
+    STA !e
+    TYA
+    ADC RoundSpecificConstsHigh,x
+    STA !e+2
     JSR ShiftVars
     ; next loop iteration
-    LDA !roundcount
+    ; roundcounta is the real round counter, X is round//20*2, used as an index to the round-specific things
+    INC !roundcounta
+    LDA !roundcountb
     INC
-    STA !roundcount
+    STA !roundcountb
     CMP.w #20
     BNE -
-
--   %R2(20)
-    LDA !roundcount
-    INC
-    STA !roundcount
-    CMP.w #40
-    BNE -
-
--   %R3(40)
-    LDA !roundcount
-    INC
-    STA !roundcount
-    CMP.w #60
-    BNE -
-
--   %R4(60)
-    LDA !roundcount
-    INC
-    STA !roundcount
-    CMP.w #80
+    STZ !roundcountb
+    INX
+    INX
+    CPX.w #8
     BNE -
 
     STZ !_+0

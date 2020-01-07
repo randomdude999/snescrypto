@@ -11,7 +11,7 @@
 ; something else (64 bytes)
 !block = $0200
 
-; set to 'speed' to use an unrolled transform function. this takes 11KB of ROM space, but takes 170 scanlines to do a block instead of X scanlines for the size-optimized one.
+; set to 'speed' to use an unrolled transform function. this takes 11KB of ROM space (instead of 1.7KB for the size-optimized version), but takes 170 scanlines to do a block instead of X scanlines for the size-optimized one.
 !optimize = size
 
 if stringsequal("!optimize","size")
