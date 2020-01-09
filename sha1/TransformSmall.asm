@@ -9,9 +9,9 @@ math pri on
 !d = !_+16
 !e = !_+20
 !roundcounta = !_+24 ; 2 bytes (only low values are used, but rep/sep is slow)
-!roundcountb = !_+30 ; used to count rounds mod 20, for cycling the round-specific ops
+!roundcountb = !_+32 ; used to count rounds mod 20, for cycling the round-specific ops
 !f = !_+26 ; 2 bytes (temporary for doing the cyclic shifting of variables at one point)
-!blkptr = !_+28 ; 2 bytes, temporary pointer
+!blkptr = !_+28 ; 4 bytes, temporary pointer
 
 
 
@@ -51,7 +51,9 @@ UpdateRoundConsts:
         STA !block+!i*4
         !i #= !i+1
     endif
-
+    ; we need to clear X somewhere for the first iter, might as well be here
+    LDX #$0000
+    RTS
 
 RoundCommon:
     LDA !a
@@ -130,7 +132,7 @@ R2:
     LDA !b
     AND !c
     ORA !_+0
-    CLC : ADC !blkptr*4
+    CLC : ADC !blkptr
     TAX
 
     LDA !b+2
@@ -196,7 +198,7 @@ ShiftVars:
 ; enter with REP #$30
 ; !block - the data to hash (64 bytes) (note: will be overwritten)
 ; !state - the current state (5*4 bytes) (obviously will be overwritten)
-; needs 6 32-bit scratch variables, so 24 bytes of scratch total (in !_)
+; needs 34 bytes of scratch in !_
 SHA1Transform:
     !i #= 0
     while !i < 5
@@ -213,13 +215,17 @@ SHA1Transform:
     AND #$000F
     BNE +
     JSR UpdateRoundConsts
+    LDA #$0000
 +   ASL
     ASL
-    ; no overflow, carry def clear
-    ADC #!block
+    TAY
+    LDA !block,y
     STA !blkptr
-    
+    LDA !block+2,y
+    STA !blkptr+2
+ 
     STX !f ; back up the index, it's overwritten by temps
+
     ; round-specific function
     JSR (RoundSpecificFuncTbl,x)
     JSR RoundCommon

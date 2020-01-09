@@ -1,5 +1,5 @@
 
-; currently like 28 bytes of scratch
+; currently like 34 bytes of scratch
 !_ = $00
 
 ; something (28 bytes)
@@ -11,7 +11,15 @@
 ; something else (64 bytes)
 !block = $0200
 
-; set to 'speed' to use an unrolled transform function. this takes 11KB of ROM space (instead of 1.7KB for the size-optimized version), but takes 170 scanlines to do a block instead of X scanlines for the size-optimized one.
+; set to 'speed' to use an unrolled transform function.
+; Variant | Code size | Cycles | Scanlines (SNES SlowROM)
+; --------+-----------+--------+-----------
+; speed   | 12051     | 24494  | 148
+; size    | 1707      | 39720  | 240
+; Cycles is number of CPU cycles to run one transform, which is the majority
+; of time spent when hashing a block (64 bytes of data). The exact timing
+; depends on the exact length of the data, for ex. 56 bytes (smallest input
+; that causes 2 blocks to be hashed) takes around 2650 extra cycles.
 !optimize = size
 
 if stringsequal("!optimize","size")

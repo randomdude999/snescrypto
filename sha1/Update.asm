@@ -2,9 +2,9 @@
 ; length in A
 ; enter with REP #$30
 SHA1Update:
-    STX !_+26
+    STX !_+36
     LDX !count
-    STA !_+24
+    STA !_+34
 
     ; trying to use 0 bytes will break shit, so let's just special case it
     CMP #$0000
@@ -45,13 +45,13 @@ SHA1Update:
     TAX
     LDY #$0000
 --  SEP #$20
--   LDA (!_+26),y
+-   LDA (!_+36),y
     STA !block,x
     INX
     INY
     CPX #$0040
     BEQ +
-    CPY !_+24
+    CPY !_+34
     BEQ ++
     BRA -
 +   REP #$20
@@ -59,7 +59,7 @@ SHA1Update:
     JSR SHA1Transform
     LDX #$0000
     PLY
-    CPY !_+24
+    CPY !_+34
     BNE --
 ++  REP #$20
     ; we done?
